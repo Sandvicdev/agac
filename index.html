@@ -32,6 +32,43 @@
             overflow: hidden;
         }
 
+        /* Sayaç */
+        .sayac-konteyner {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.75);
+            color: #f0e68c;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.6);
+            border: 1px solid #b5944c;
+            z-index: 30;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .sayac-ikon {
+            font-size: 1.3rem;
+        }
+
+        .sayac-rakam {
+            background: #f0e68c;
+            color: #1a3c1a;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 1.1rem;
+            min-width: 45px;
+            text-align: center;
+            display: inline-block;
+        }
+
         /* Yol - alt kısımda */
         .yol {
             position: absolute;
@@ -461,12 +498,25 @@
                 font-size: 1.1rem;
                 padding: 12px 28px;
             }
+            .sayac-konteyner {
+                top: 10px;
+                right: 10px;
+                padding: 8px 15px;
+                font-size: 0.85rem;
+            }
         }
     </style>
 </head>
 <body>
     <!-- Ana alan -->
     <div id="agac-alani">
+        <!-- Sayaç -->
+        <div class="sayac-konteyner">
+            <span class="sayac-ikon">👁️</span>
+            <span>Görüntülenme:</span>
+            <span class="sayac-rakam" id="sayacRakam">0</span>
+        </div>
+
         <!-- Yol -->
         <div class="yol">
             <div class="yol-cizgi"></div>
@@ -528,9 +578,36 @@
             const videoElement = document.getElementById('agacVideosu');
             const kapatBtn = document.getElementById('kapatVideoBtn');
             const agacAlan = document.getElementById('agac-alani');
+            const sayacRakam = document.getElementById('sayacRakam');
 
             let animasyonDevamEdiyor = false;
 
+            // ===== GÖRÜNTÜLENME SAYACI =====
+            function sayacGuncelle() {
+                // localStorage'den mevcut sayacı al
+                let sayac = localStorage.getItem('agacSiteSayac');
+                
+                if (sayac === null) {
+                    // İlk kez ziyaret ediliyor
+                    sayac = 1;
+                } else {
+                    // Mevcut sayacı artır
+                    sayac = parseInt(sayac) + 1;
+                }
+                
+                // Yeni değeri kaydet
+                localStorage.setItem('agacSiteSayac', sayac);
+                
+                // Ekranda göster
+                sayacRakam.textContent = sayac;
+                
+                console.log(`👁️ Site ${sayac} kez görüntülendi.`);
+            }
+
+            // Sayfa yüklendiğinde sayacı güncelle
+            sayacGuncelle();
+
+            // ===== VİDEO FONKSİYONLARI =====
             function videoyuAc() {
                 videoKonteyner.classList.add('aktif');
                 videoElement.currentTime = 0;
@@ -548,6 +625,7 @@
                 console.log("Video kapatıldı.");
             }
 
+            // ===== ANİMASYON =====
             function animasyonuBaslat() {
                 if (animasyonDevamEdiyor) return;
                 animasyonDevamEdiyor = true;
@@ -601,7 +679,7 @@
                     baslatBtn.style.opacity = "1";
                     baslatBtn.style.pointerEvents = "auto";
                     
-                    // Arabayı yavaşça geri al (opsiyonel: hemen kaybolsun)
+                    // Arabayı yavaşça geri al
                     setTimeout(() => {
                         araba.classList.remove('hareket-et');
                         agacKonteyner.classList.remove('sallan');
@@ -610,13 +688,12 @@
                 }, 3200);
             }
 
-            // Butona tıkla
+            // ===== OLAY DİNLEYİCİLERİ =====
             baslatBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 animasyonuBaslat();
             });
 
-            // Ağaca tıklayınca da animasyon başlasın (alternatif)
             agacKonteyner.addEventListener('click', (e) => {
                 e.stopPropagation();
                 if (!animasyonDevamEdiyor) {
@@ -624,7 +701,6 @@
                 }
             });
 
-            // Video kapatma
             kapatBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 videoyuKapat();
@@ -642,7 +718,6 @@
                 }
             });
 
-            // Klavyeden boşluk tuşuyla da animasyon başlat
             document.addEventListener('keydown', (e) => {
                 if (e.key === ' ' && !videoKonteyner.classList.contains('aktif') && !animasyonDevamEdiyor) {
                     e.preventDefault();
@@ -651,6 +726,7 @@
             });
 
             console.log("🚗🌳 Animasyon hazır! Butona bas veya ağaca tıkla, araba gelsin çarpsın!");
+            console.log("👁️ Görüntülenme sayacı aktif!");
         })();
     </script>
 </body>
